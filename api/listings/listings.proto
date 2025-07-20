@@ -1,0 +1,92 @@
+syntax = "proto3";
+
+package listings;
+
+import "google/protobuf/timestamp.proto";
+import "validate/validate.proto";
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+option go_package = "github.com/Snake1-1eyes/marketplace/pkg/api";
+
+service ListingsService {
+    rpc CreateListing (CreateListingRequest) returns (ListingResponse) {
+        option (google.api.http) = {
+            post: "/v1/listings"
+            body: "*"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Создание нового объявления"
+            description: "Создает новое объявление с указанным заголовком, текстом, изображением и ценой"
+        };
+    }
+
+    rpc GetListings (GetListingsRequest) returns (ListingsResponse) {
+        option (google.api.http) = {
+            get: "/v1/listings"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Получение ленты объявлений"
+            description: "Возвращает ленту объявлений с возможностью сортировки, фильтрации и пагинации"
+        };
+    }
+}
+
+message CreateListingRequest {
+    string title = 1 [(validate.rules).string = {min_len: 5, max_len: 100}];
+    string description = 2 [(validate.rules).string = {min_len: 10, max_len: 1000}];
+    string image_url = 3 [(validate.rules).string = {uri: true}];
+    float price = 4 [(validate.rules).float = {gt: 0}];
+}
+
+message GetListingsRequest {
+    uint32 page = 1 [(validate.rules).uint32 = {gt: 0, lte: 100}];
+    uint32 per_page = 2 [(validate.rules).uint32 = {gt: 0, lte: 50}];
+    SortField sort_by = 3;
+    SortOrder sort_order = 4;
+    optional float min_price = 5 [(validate.rules).float = {gte: 0}];
+    optional float max_price = 6 [(validate.rules).float = {gt: 0}];
+}
+
+enum SortField {
+    SORT_FIELD_UNSPECIFIED = 0;
+    SORT_FIELD_CREATED_AT = 1;
+    SORT_FIELD_PRICE = 2;
+}
+
+enum SortOrder {
+    SORT_ORDER_UNSPECIFIED = 0;
+    SORT_ORDER_ASC = 1;
+    SORT_ORDER_DESC = 2;
+}
+
+message ListingResponse {
+    uint64 id = 1;
+    string title = 2;
+    string description = 3;
+    string image_url = 4;
+    float price = 5;
+    string author_username = 6;
+    google.protobuf.Timestamp created_at = 7;
+    bool is_owner = 8;
+}
+
+message ListingsResponse {
+    repeated ListingResponse listings = 1;
+    uint32 total = 2;
+    uint32 page = 3;
+    uint32 per_page = 4;
+    uint32 total_pages = 5;
+}
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+    info: {
+        title: "Marketplace Listings API";
+        version: "1.0.0";
+        description: "API для управления и просмотра объявлений маркетплейса";
+    };
+    host: "localhost:8080";
+    schemes: HTTP;
+    consumes: "application/json";
+    produces: "application/json";
+};
