@@ -1,0 +1,16 @@
+/bin
+/vendor
+/vendor.pb
+/vendor.protogen
+.DS_STORE
+.DS_Store
+/.idea
+/.vscode
+
+/.o3/k8s/values_local.yaml
+/.env
+cover.out.tmp
+
+/build/
+/postgres-data/
+/task.md
