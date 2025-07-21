@@ -31,16 +31,19 @@ REST API сервис для маркетплейса с поддержкой а
 
 1. Клонировать репозиторий:
    ```
-   git clone [url-репозитория]
+   git clone https://github.com/Snake1-1eyes/vk_task_marketplace
    cd vk_marketplace_task
    ```
 
 2. Настроить параметры в файле `.env` или `config/config.yml` (при необходимости)
 
 3. Запустить проект:
+
+    через `make up` или:
    ```
    docker-compose up -d
    ```
+
 
 4. Сервис станет доступен по адресам:
    - gRPC: `localhost:50051`
