@@ -1,0 +1,39 @@
+services:
+  postgres:
+    image: postgres:17.5
+    env_file: .env
+    restart: always
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 1s
+      timeout: 1s
+      retries: 30
+    networks:
+      - marketplace-network
+
+  marketplace-api:
+   build:
+     context: .
+     dockerfile: Dockerfile
+   env_file: .env
+   depends_on:
+     postgres:
+       condition: service_healthy
+   ports:
+     - "${GRPC_PORT}:${GRPC_PORT}"
+     - "${GATEWAY_PORT}:${GATEWAY_PORT}"
+   volumes:
+     - ./config:/app/config
+     - ./pkg:/app/pkg
+     - ./migrations:/app/migrations
+   networks:
+     - marketplace-network
+
+
+networks:
+  marketplace-network:
+    driver: bridge

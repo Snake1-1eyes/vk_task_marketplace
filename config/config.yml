@@ -1,2 +1,37 @@
 env: development
 log_level: info
+
+grpc:
+  host: 0.0.0.0
+  port: 50051
+  timeout: 5s
+  max_conn_age: 5m
+
+gateway:
+  host: 0.0.0.0
+  port: 8080
+  grpc_server_host: marketplace-api
+  grpc_server_port: 50051
+  timeout: 10s
+
+jwt:
+  secret_key: superpuper-secret-key
+  token_duration: 24h
+
+swagger:
+  auth_path: ./pkg/api/auth/auth.swagger.json
+  listings_path: ./pkg/api/listings/listings.swagger.json
+
+migrations:
+  dir: ./migrations
+
+postgres:
+  host: postgres
+  port: 5432
+  user: postgres
+  password: postgres
+  db: marketplace
+  ssl_mode: disable
+  max_open_conns: 50
+  min_conns: 25
+  conn_max_lifetime: 30m

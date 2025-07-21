@@ -4,7 +4,8 @@ APP_NAME := marketplace
 BUILD_DIR := build
 LOCAL_BIN := $(CURDIR)/bin
 OUT_PATH := $(CURDIR)/pkg/api
-
+POSTGRES_DSN := postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTGRES_HOST):$(POSTGRES_PORT)/$(POSTGRES_DB)?sslmode=$(POSTGRES_SSL_MODE)
+GOOSE := $(LOCAL_BIN)/goose
 
 update:
 	go mod tidy
@@ -67,3 +68,28 @@ generate: .vendor-proto/validate .vendor-proto/google/api .vendor-proto/protoc-g
 		mkdir -p vendor.protogen/protoc-gen-openapiv2
 		mv vendor.protogen/grpc-ecosystem/protoc-gen-openapiv2/options vendor.protogen/protoc-gen-openapiv2
 		rm -rf vendor.protogen/grpc-ecosystem
+
+up:
+	docker-compose up -d
+
+down:
+	docker-compose down
+
+restart: down up
+
+install-goose:
+	mkdir -p $(LOCAL_BIN)
+	@GOBIN=$(LOCAL_BIN) go install github.com/pressly/goose/v3/cmd/goose@latest
+	chmod +x $(GOOSE)
+
+goose-add: install-goose
+	$(GOOSE) -dir ./migrations postgres "$(POSTGRES_DSN)" create $(NAME) sql
+
+goose-up:
+	$(GOOSE) -dir ./migrations postgres "$(POSTGRES_DSN)" up
+
+goose-down: install-goose
+	$(GOOSE) -dir ./migrations postgres "$(POSTGRES_DSN)" down
+
+goose-status: install-goose
+	$(GOOSE) -dir ./migrations postgres "$(POSTGRES_DSN)" status
